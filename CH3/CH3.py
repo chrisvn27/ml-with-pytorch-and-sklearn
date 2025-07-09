@@ -99,3 +99,92 @@ plt.legend(loc='upper left')
 plt.tight_layout()
 #plt.savefig('figures/03_01.png', dpi=300)
 plt.show()
+
+
+#Starting on pag 59
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+def sigmoid(z):
+
+    return 1.0/(1+ np.exp(-z))
+
+z = np.arange(-7,7, 0.1)
+
+sigma_z = sigmoid(z)
+
+plt.plot(z,sigma_z)
+plt.axvline(0,0, color = 'r')
+plt.ylim(-0.1,1.1)
+plt.xlabel('z')
+plt.ylabel('$\sigma (z)$')
+
+plt.yticks([0.0,0.5,1.0])
+ax = plt.gca()
+ax.yaxis.grid(True)
+plt.tight_layout()
+plt.show()
+
+def loss_1(z):
+    return -np.log(sigmoid(z))
+
+def loss_0(z):
+    return -np.log(1-sigmoid(z))
+
+z = np.arange(-10,10,0.1)
+sigma_z = sigmoid(z)
+c1 = [loss_1(x) for x in z]
+plt.plot(sigma_z,c1, label='L(w, b) if y =1')
+c0 = [loss_0(x) for x in z]
+plt.plot(sigma_z, c0, linestyle ='--', label='L(w,b)if y=0')
+plt.ylim(0.0, 5.1)
+plt.xlim([0,1])
+plt.xlabel('$\sigma (z)$')
+plt.ylabel('L(w,b)')
+plt.legend(loc = 'best')
+plt.tight_layout()
+plt.show()
+
+class LogisticRegressionGD:
+    def __init__(self, eta= 0.01, n_iter=50, random_state=1):
+        self.eta = eta
+        self.n_iter = n_iter
+        self.random_state = random_state
+    
+    def fit(self, X, y):
+        rgen = np.random.RandomState(self.random_state)
+        self.w_ = rgen.normal(loc=0.0, scale=0.01, size=X.shape[1])
+        self.b_ = np.float64(0.0)
+        self.losses_ = []
+
+        for i in range(self.n_iter):
+            net_input = self.net_input(X)
+            output = self. activation(net_input)
+            errors = (y-output)
+            self.w_ += self.eta * 2.0 * X.T.dot(errors) / X.shape[0]
+            self.b_ += self.eta * 2.0 * errors.mean()
+            loss = (-y.dot(np.log(output)) - ((1-y).dot(np.log(1- output)))) / X.shape[0]
+            self.losses_.append(loss)
+        return self
+    
+    def net_input(self, X):
+        return np.dot(X, self.w_) + self.b_ #same as a linear layer Y= WX + b
+    
+    def activation(self, z):
+        return 1.0 / (1.0 + np.exp(-np.clip(z, -250, 250))) #we use clip to avoid overflow
+    
+    def predict(self, X):
+        return np.where(self.activation(self.net_input(X)) >= 0.5, 1, 0)
+    
+X_train_01_subset = X_train_std[(y_train == 0) | (y_train == 1)]
+y_train_01_subset = y_train[(y_train == 0) | (y_train ==1)]
+lrgd = LogisticRegressionGD(eta= 0.3, n_iter=1000, random_state= 1)
+
+lrgd.fit(X_train_01_subset, y_train_01_subset)
+plot_decision_regions(X=X_train_01_subset, y=y_train_01_subset, classifier = lrgd)
+plt.xlabel('Petal length [standardized]')
+plt.ylabel('Petal width [standardized]')
+plt.legend(loc = 'best')
+plt.tight_layout()
+plt.show()
