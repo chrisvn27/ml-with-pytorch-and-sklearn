@@ -208,3 +208,37 @@ plt.ylabel('Petal width [standardized]')
 plt.legend(loc = 'upper left')
 plt.tight_layout()
 plt.show()
+
+#Start on page 73 (07/10/2025)
+
+weights, params = [], []
+for c in np.arange(-5, 5):
+    lr = LogisticRegression(C=10.0**c, multi_class='ovr')
+    lr.fit(X_train_std, y_train)
+    weights.append(lr.coef_[1])
+    params.append(10.0**c)
+
+weights = np.array(weights)
+plt.plot(params, weights[:,0], label='Petal length')
+plt.plot(params, weights[:,1], linestyle='--', label='Petal width')
+plt.ylabel('Weight coefficient')
+plt.xlabel('C')
+plt.legend(loc='best')
+plt.xscale('log')
+plt.show()
+
+from sklearn.svm import SVC
+svm = SVC(kernel='linear', C=1.0, random_state=1)
+svm.fit(X_train_std, y_train)
+plot_decision_regions(X_combined_std,
+                      y_combined,
+                      classifier= svm,
+                      test_idx=range(105,150))
+plt.xlabel('Petal length [standardized]')
+plt.ylabel('Petal width [standardized]')
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+
+# Finished on page 80
+
