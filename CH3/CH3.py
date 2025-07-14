@@ -281,3 +281,25 @@ plot_decision_regions(X_xor, y_xor, classifier=svm)
 plt.legend(loc ='upper left')
 plt.tight_layout()
 plt.show()
+#Stopping at end of page 83
+
+#Starting at end of page 83
+svm = SVC(kernel='rbf', random_state=1, gamma=0.2, C=1.0)
+svm.fit(X_train_std, y_train)
+plot_decision_regions(X_combined_std,y_combined, classifier= svm, test_idx= range(105,150))
+plt.xlabel('Petal length [standardized]')
+plt.ylabel('Petal width [standardized]')
+plt.legend(loc ='upper left')
+plt.tight_layout()
+plt.show()
+
+#Increasing the value of gamma will lead to a more bumpy decision boundary.
+svm = SVC(kernel='rbf', random_state=1, gamma=100.0, C=1.0)
+svm.fit(X_train_std, y_train)
+plot_decision_regions(X_combined_std,y_combined, classifier= svm, test_idx= range(105,150))
+plt.xlabel('Petal length [standardized]')
+plt.ylabel('Petal width [standardized]')
+plt.legend(loc ='upper left')
+plt.tight_layout()
+plt.show()
+#Stopping at end of page 86 (Decision Tree learning)
