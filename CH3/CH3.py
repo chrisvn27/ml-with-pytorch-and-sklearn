@@ -328,3 +328,27 @@ plt.tight_layout()
 plt.show()
 
 #stopped at page 95
+
+from sklearn.ensemble import RandomForestClassifier
+forest = RandomForestClassifier( n_estimators = 25, random_state = 1, n_jobs = 2)
+forest.fit(X_train, y_train)
+plot_decision_regions(X_combined, y_combined, classifier= forest, test_idx= range(105,150))
+plt.xlabel('Petal length [cm]')
+plt.ylabel('Petal width [cm]')
+plt.legend(loc = 'upper left')
+plt.tight_layout()
+plt.show()
+
+#Implementing K-Nearest Neighbors
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=5, p=2, metric='minkowski')
+knn.fit(X_train_std, y_train)
+plot_decision_regions(X_combined_std, y_combined, classifier= knn, test_idx=range(105,150))
+plt.xlabel('Petal length [standardized]')
+plt.ylabel('Petal width [standardized]')
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+
+#Important: No algorithm will be able to make good predictions without informative and discriminatory
+#features.
