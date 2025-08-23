@@ -246,3 +246,67 @@ plt.tight_layout()
 plt.show()
 
 #Stopped at page 162
+#LDA via scikit-learn  
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+lda = LDA(n_components=2)
+X_train_lda = lda.fit_transform(X_train_std, y_train)
+
+lr = LogisticRegression(multi_class='ovr', random_state=1, solver='lbfgs')
+lr = lr.fit(X_train_lda, y_train)
+plot_decision_regions(X_train_lda, y_train, classifier= lr)
+plt.xlabel('LD 1')
+plt.ylabel('LD 2')
+plt.legend(loc='lower left')
+plt.tight_layout()
+plt.show()
+
+X_test_lda = lda.transform(X_test_std)
+plot_decision_regions(X_test_lda, y_test, classifier=lr)
+plt.xlabel('LD 1')
+plt.ylabel('LD 2')
+plt.legend(loc= 'lower left')
+plt.tight_layout()
+plt.show()
+
+# Nonlinear dimensionality reduction and visualization
+# Note: The development and application of nonlinear dimensionality reduction thechniques
+# is also often referred to as manifold learning, where a manifold refers to a lower dimensional
+# topologial space embedded in a high-dimensional space
+
+
+# Visualizing data via t-distributed stochastic neighbor embedding
+
+from sklearn.datasets import load_digits
+digits = load_digits()
+
+fig, ax = plt.subplots(1,4)
+for i in range(4):
+    ax[i].imshow(digits.images[i], cmap='Greys')
+plt.show()
+
+print(digits.data.shape)
+y_digits = digits.target
+X_digits = digits.data
+
+from sklearn.manifold import TSNE
+tsne = TSNE(n_components= 2, init='pca', random_state=123)
+X_digits_tsne = tsne.fit_transform(X_digits)
+
+# import matplotlib.patheffects as PathEffects
+# def plot_projection(x, colors):
+
+#     f = plt.figure(figsize=(8,8))
+#     ax = plt.subplot(aspect='equal')
+#     for i in range(10):
+#         plt.scatter(x[colors == i, 0],
+#                     x[colors == i, 1])
+    
+#     for i in range(10):
+#         xtext, ytext = np.median(x[colors == i, :], axis=0)
+#         txt = ax.text(xtext, ytext, str(i), fontsize= 24)
+#         txt.set_path_effects([
+#             PathEffects.Stroke(linewidth=5, foreground="W"),
+#             PathEffects.Normal()
+#         ])
+#     plot_projection(X_digits_tsne, y_digits)
+#     plt.show()
