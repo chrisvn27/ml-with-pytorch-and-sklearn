@@ -141,3 +141,124 @@ plt.xlabel('Parameter C')
 plt.ylabel('Accuracy')
 plt.ylim([0.8, 1.0])
 plt.show()
+
+#Stopped at page 185
+
+#Fine-tuning machine learning models via grid search
+#Tuning hyperparameters via grid search
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
+pipe_svc = make_pipeline(StandardScaler(),
+                         SVC(random_state=1))
+param_range = [0.0001, 0.001, 0.01, 0.1,
+               1.0, 10.0, 100.0, 1000.0]
+param_grid = [{'svc__C': param_range, 
+               'svc__kernel': ['linear']},
+               {'svc__C': param_range,
+                'svc__gamma': param_range,
+                'svc__kernel':['rbf']}]
+gs = GridSearchCV(estimator= pipe_svc,
+                  param_grid= param_grid,
+                  scoring='accuracy',
+                  cv=10,
+                  refit=True,
+                  n_jobs=-1)
+gs = gs.fit(X_train, y_train)
+print(gs.best_score_)
+print(gs.best_params_)
+
+clf = gs.best_estimator_
+clf.fit(X_train,y_train)
+print(f"Test accuracy: {clf.score(X_test,y_test):.3f}")
+
+import scipy
+param_range = scipy.stats.loguniform(0.0001, 1000.0)
+print(param_range)
+np.random.seed(1)
+print(param_range.rvs(10))
+
+from sklearn.model_selection import RandomizedSearchCV
+pipe_svc = make_pipeline(StandardScaler(),
+                         SVC(random_state=1))
+param_grid = [{'svc__C': param_range,
+               'svc__kernel': ['linear']},
+               {'svc__C': param_range,
+                'svc__gamma': param_range,
+                'svc__kernel': ['rbf']}]
+rs= RandomizedSearchCV(estimator=pipe_svc,
+                       param_distributions=param_grid,
+                       scoring='accuracy',
+                       refit=True,
+                       n_iter=20,
+                       cv=10,
+                       random_state=1,
+                       n_jobs=-1)
+rs = rs.fit(X_train, y_train)
+print(rs.best_score_)
+print(rs.best_params_)
+
+#More resource-efficient hyperparameter search with succesive halving
+from sklearn.experimental import enable_halving_search_cv
+from sklearn.model_selection import HalvingRandomSearchCV
+hs = HalvingRandomSearchCV(pipe_svc,
+                           param_distributions= param_grid,
+                           n_candidates = 'exhaust',
+                           resource='n_samples',
+                           factor=1.5,
+                           random_state=1,
+                           n_jobs=-1)
+
+hs = hs.fit(X_train, y_train)
+print(hs.best_score_)
+print(hs.best_params_)
+clf = hs.best_estimator_
+print(f"Test accuracy: {hs.score(X_test, y_test):.3f}")
+
+
+#Algorithm selection with nested cross-validation
+param_range = [0.0001, 0.001, 0.01, 0.1,
+               1.0, 10.0, 100.0, 1000.0]
+param_grid = [{'svc__C': param_range, 
+               'svc__kernel': ['linear']},
+               {'svc__C': param_range,
+                'svc__gamma': param_range,
+                'svc__kernel':['rbf']}]
+gs = GridSearchCV(estimator= pipe_svc,
+                  param_grid=param_grid,
+                  scoring='accuracy',
+                  cv=2)
+
+scores = cross_val_score(gs, X_train, y_train,
+                         scoring='accuracy', cv=5)
+print(f"CV accuracy: {np.mean(scores):.3f}" 
+      f" +/- {np.std(scores):.3f}")
+
+from sklearn.tree import DecisionTreeClassifier
+gs = GridSearchCV(
+    estimator=DecisionTreeClassifier(random_state=0),
+    param_grid=[{'max_depth':[1,2,3,4,5,6,7, None]}],
+    scoring='accuracy',
+    cv=2
+)
+
+scores = cross_val_score(gs, X_train, y_train, scoring='accuracy', cv=5)
+print(f"CV accuracy: {np.mean(scores):.3f} "
+      f"+/- {np.std(scores):.3f}")
+
+#Reading a confusion matrix
+from sklearn.metrics import confusion_matrix
+pipe_svc.fit(X_train, y_train)
+y_pred = pipe_svc.predict(X_test)
+confmat = confusion_matrix(y_true=y_test, y_pred=y_pred)
+print(confmat)
+
+fig, ax = plt.subplots(figsize=(2.5,2.5))
+ax.matshow(confmat, cmap=plt.cm.Blues, alpha=0.3)
+for i in range(confmat.shape[0]):
+    for j in range(confmat.shape[1]):
+        ax.text(x=j, y=i, s=confmat[i,j],
+                va='center', ha='center')
+ax.xaxis.set_ticks_position('bottom')
+plt.xlabel("Predicted label")
+plt.ylabel("True label")
+plt.show()

@@ -288,9 +288,9 @@ print(digits.data.shape)
 y_digits = digits.target
 X_digits = digits.data
 
-from sklearn.manifold import TSNE
-tsne = TSNE(n_components= 2, init='pca', random_state=123)
-X_digits_tsne = tsne.fit_transform(X_digits)
+# from sklearn.manifold import TSNE
+# tsne = TSNE(n_components= 2, init='pca', random_state=123)
+# X_digits_tsne = tsne.fit_transform(X_digits)
 
 # import matplotlib.patheffects as PathEffects
 # def plot_projection(x, colors):
