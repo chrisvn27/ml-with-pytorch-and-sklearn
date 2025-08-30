@@ -242,7 +242,6 @@ class MajorityVoteClassifier(*base_classes):
             return out
 
 
-
 # Using the majority voting principle to make predictions
 
 from sklearn import datasets
