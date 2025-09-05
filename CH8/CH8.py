@@ -73,3 +73,10 @@ def preprocessor(text):
     emoticons = re.findall('(?::|;|=)(?:-)?(?:\)|\(|D|P)', text)
     text = (re.sub('[\W]+', ' ', text.lower()) + ' '.join(emoticons).replace('-',''))
     return text
+
+print(preprocessor(df.loc[0, 'review'][-50:]))
+
+print(preprocessor("</a>This :) is :( a test :-)!"))
+
+#Should go back to page 254 (cleaning data) for a new review
+#to understand more.
