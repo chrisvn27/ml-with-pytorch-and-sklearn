@@ -78,5 +78,23 @@ print(preprocessor(df.loc[0, 'review'][-50:]))
 
 print(preprocessor("</a>This :) is :( a test :-)!"))
 
-#Should go back to page 254 (cleaning data) for a new review
-#to understand more.
+# Processing documents into Tokens
+def tokenizer(text):
+    return text.split()
+print(tokenizer('runners like running and thus they run'))
+
+from nltk.stem.porter import PorterStemmer
+porter = PorterStemmer()
+
+def tokenizer_porter(text):
+    return [porter.stem(word) for word in text.split()]
+print(tokenizer_porter('runners like running and thus they run'))
+
+## Run this only once
+# import nltk
+# nltk.download('stopwords')
+
+from nltk.corpus import stopwords
+stop = stopwords.words('english')
+print([w for w in tokenizer_porter('a runner likes running and runs a lot') 
+ if w not in stop])
