@@ -101,3 +101,63 @@ print(f"Slope: {lr.w_[0]:.3f}")
 print(f"Intercept (bias): {lr.b_[0]:.3f}")
 
 # Stopped at beginning of page 283
+
+from sklearn.linear_model import LinearRegression
+slr = LinearRegression()
+slr.fit(X,y)
+y_pred = slr.predict(X)
+print(f"Slope: {slr.coef_[0]:.3f}")
+print(f"Intercept: {slr.intercept_:.3f}")
+
+lin_regplot(X,y, slr)
+plt.xlabel("Living area above ground in square feet")
+plt.ylabel("Sale price in U.S. dollars")
+plt.tight_layout()
+plt.show()
+
+# Analytical solution: w = (X^TX)**-1 X^T y
+# adding a column vecotr of "ones"
+Xb = np.hstack((np.ones((X.shape[0],1)),X))
+w = np.zeros(X.shape[1])
+z = np.linalg.inv(np.dot(Xb.T, Xb))
+w = np.dot(z, np.dot(Xb.T, y))
+print(f"Slope: {w[1]:.3f}")
+print(f"Intercept: {w[0]:.3f}")
+
+
+from sklearn.linear_model import RANSACRegressor
+ransac = RANSACRegressor(
+    LinearRegression(),
+    max_trials=100,
+    min_samples=0.95,
+    residual_threshold=None,
+    random_state=123
+)
+ransac.fit(X,y)
+
+inlier_mask = ransac.inlier_mask_
+outlier_mask = np.logical_not(inlier_mask)
+line_X = np.arange(3,10,1)
+line_y_ransac= ransac.predict(line_X[:,np.newaxis])
+plt.scatter(X[inlier_mask], y[inlier_mask],
+            c='steelblue', edgecolor='white',
+            marker='o', label='Inliers')
+plt.scatter(X[outlier_mask], y[outlier_mask],
+            c='limegreen', edgecolor='white',
+            marker='s', label='Outliers')
+plt.plot(line_X, line_y_ransac, color='black', lw=2)
+plt.xlabel('Living area above ground in square feet')
+plt.ylabel('Sale price in U.S. dollars')
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+
+print(f"Slope: {ransac.estimator_.coef_[0]:.3f}")
+print(f"Intercept: {ransac.estimator_.intercept_:.3f}")
+
+def mean_absolute_deviation(data):
+    return np.mean(np.abs(data- np.mean(data)))
+
+print(mean_absolute_deviation(y))
+
+#Stopped at page 288
