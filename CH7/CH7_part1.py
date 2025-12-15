@@ -340,3 +340,6 @@ for r, _ in enumerate(grid.cv_results_['mean_test_score']):
 
 print(f"Best parameters: {grid.best_params_}")
 print(f"ROC AUC: {grid.best_score_:.2f}")
+
+# Stopped at page 223
+#  Bagging - building an esemble of classifier from bootstrap samples
