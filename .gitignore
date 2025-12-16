@@ -3,6 +3,8 @@ __pycache__/
 *.pyc
 *.pkl
 venv/
+celeba/
+MNIST/
 
 # IMDB dataset (folder + compressed file)
 aclImdb
