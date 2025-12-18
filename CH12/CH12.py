@@ -128,7 +128,7 @@ import torchvision
 
 image_path = './'
 celeba_dataset = torchvision.datasets.CelebA(
-    image_path, split='train', target_type='attr', download=True
+    image_path, split='train', target_type='attr', download=False
 )
 
 assert isinstance(celeba_dataset, torch.utils.data.Dataset)
@@ -321,3 +321,91 @@ ax.tick_params(axis='both', which='major',labelsize=15)
 plt.show()
 
 #Stopped at 398
+
+# Evaluating the trained model on the test dataset
+X_test_norm = (X_test - np.mean(X_train)) / np.std(X_train)
+X_test_norm = torch.from_numpy(X_test_norm).float()
+y_test = torch.from_numpy(y_test)
+pred_test = model(X_test_norm)
+correct = (torch.argmax(pred_test, dim=1) == y_test).float()
+accuracy = correct.mean()
+print(f"Test Acc.: {accuracy:.4f}")
+
+#Saving and reloading the model
+path = 'iris_classifier.pt'
+torch.save(model, path)
+
+#uploading the model
+model_new = torch.load(path, map_location="cpu", weights_only=False)
+print(model_new.eval())
+
+pred_test = model_new(X_test_norm)
+correct = (torch.argmax(pred_test, dim=1) == y_test).float()
+accuracy = correct.mean()
+print(f"Accuracy: {accuracy:.4f}")
+
+X = np.array([1, 1.4, 2.5]) #first value must be 1 as this accunts for the bias (b)= w0x0, x0 = 1
+w = np.array([0.4, 0.3, 0.5])
+
+def net_input(X, w):
+    return np.dot(X, w)
+
+def logistic(z):
+    return 1.0 / (1.0 + np.exp(-z))
+
+def logistic_activation(X, w):
+    z = net_input(X,w)
+    return logistic(z)
+
+print(f"P(y=1|x) = {logistic_activation(X,w):.3f}")
+
+# W: array with sahpe = (n_outputs_units, n_hidden_units + 1)
+#    note that the first column are the bias units
+W = np.array([[1.1, 1.2, 0.8, 0.4],
+              [0.2, 0.4, 1.0, 0.2],
+              [0.6, 1.5, 1.2, 0.7]])
+
+# A: data array with shape = (n_hidden_units + 1, n_samples)
+#   note that the first column of this array must be 1
+A = np.array([[1, 0.1, 0.4, 0.6]])
+Z = np.dot(W, A[0])
+y_probas = logistic(Z)
+print("Net Input : \n", Z)
+print("Output Units:\n", y_probas)
+
+y_class = np.argmax(Z, axis = 0)
+print('Predicted class label: ', y_class)
+
+def softmax(z):
+    return np.exp(z) / np.sum(np.exp(z))
+y_probas = softmax(Z)
+print('Probabilities: \n', y_probas)
+print(np.sum(y_probas))
+
+print(torch.softmax(torch.from_numpy(Z), dim = 0))
+
+# Hyperbolic tangent
+def tanh(z):
+    e_p = np.exp(z)
+    e_m = np.exp(-z)
+    return (e_p - e_m) / (e_p +e_m)
+z = np.arange(-5, 5, 0.005)
+log_act = logistic(z)
+tanh_act = tanh(z)
+plt.ylim([-1.5, 1.5])
+plt.xlabel('net input $z$')
+plt.ylabel('activation $\phi*(z)$')
+plt.axhline(1, color = 'black', linestyle=':')
+plt.axhline(0.5, color = 'black', linestyle=':')
+plt.axhline(0, color = 'black', linestyle=':')
+plt.axhline(-0.5, color = 'black', linestyle=':')
+plt.axhline(-1, color = 'black', linestyle=':')
+plt.plot(z, tanh_act,
+         linewidth=3, linestyle='--',
+         label='tanh')
+plt.plot(z,log_act,
+         linewidth=3,
+         label='logistic')
+plt.legend(loc='lower right')
+plt.tight_layout()
+plt.show()
