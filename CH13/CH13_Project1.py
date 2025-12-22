@@ -69,3 +69,49 @@ x_test = torch.cat([x_test_numeric, origin_encoded],1).float()
 
 y_train = torch.tensor(df_train_norm['MPG'].values).float()
 y_test = torch.tensor(df_test_norm['MPG'].values).float()
+
+
+train_ds = TensorDataset(x_train, y_train)
+batch_size = 8
+torch.manual_seed(1)
+train_dl = DataLoader(train_ds, batch_size, shuffle=True)
+
+hidden_units = [8, 4]
+input_size = x_train.shape[1]
+all_layers = []
+for hidden_unit in hidden_units:
+    layer = nn.Linear(input_size, hidden_unit)
+    all_layers.append(layer)
+    all_layers.append(nn.ReLU())
+    input_size = hidden_unit
+all_layers.append(nn.Linear(hidden_units[-1], 1))
+model = nn.Sequential(*all_layers)
+print(model)
+
+loss_fn = nn.MSELoss()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+
+torch.manual_seed(1)
+num_epochs = 200
+log_epochs = 20
+
+for epoch in range(num_epochs):
+    loss_hist_train = 0
+    for x_batch, y_batch in train_dl:
+        pred = model(x_batch).squeeze(1)
+        loss = loss_fn(pred, y_batch)
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+        loss_hist_train += loss.item()
+    
+    if epoch % log_epochs == 0:
+        print(f"Epoch {epoch} Loss: {loss_hist_train/len(train_dl):.4f}")
+        ##len(train_dl) = num of batches overall
+
+with torch.no_grad():
+    pred = model(x_test.float()).squeeze(1)
+    loss = loss_fn(pred, y_test)
+    print(f"Test MSE: {loss.item():.4f}")
+    print(f"Test MAE: {nn.L1Loss()(pred, y_test).item():.4f}")
+
