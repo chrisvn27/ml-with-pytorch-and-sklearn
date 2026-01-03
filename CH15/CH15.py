@@ -38,4 +38,5 @@ for t in range(3):
     print('\tOutput (manual) :', ot.detach().numpy())
     print('\tRNN output\t:', output[:,t].detach().numpy(),'\n')
 
-print(output)
+#Note that RNN outputs only the hidden state, not ot, to get ot
+#We should call a linear layer to do this with nn.Linear()
