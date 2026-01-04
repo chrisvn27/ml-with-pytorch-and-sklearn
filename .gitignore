@@ -10,3 +10,6 @@ MNIST/
 # IMDB dataset (folder + compressed file)
 aclImdb
 aclImdb_v1.tar.gz
+
+#Mysterious Island.txt
+MysteriousIsland.txt
