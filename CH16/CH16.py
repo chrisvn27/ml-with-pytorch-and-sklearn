@@ -44,3 +44,40 @@ print(context_vec_2)
 context_vectors = torch.matmul(attention_weights, embedded_sentence)
 
 print(torch.allclose(context_vectors[1], context_vec_2))
+
+# query, key, and value
+torch.manual_seed(123)
+d = embedded_sentence.shape[1]
+U_query = torch.rand(d,d)
+U_key = torch.rand(d,d)
+U_value = torch.rand(d,d)
+
+x_2 = embedded_sentence[1,:]
+query_2 = U_query.matmul(x_2)
+key_2 = U_key.matmul(x_2)
+value_2 = U_value.matmul(x_2)
+
+# We also need the key and value sentences for all other input
+# elements, which we can compute as follows
+keys = U_key.matmul(embedded_sentence.T).T
+queries = U_query.matmul(embedded_sentence.T).T
+values = U_value.matmul(embedded_sentence.T).T
+
+#Checking if they are correct
+print('query 2', torch.allclose(query_2, queries[1]))
+print('key 2', torch.allclose(key_2, keys[1]))
+print('value 2', torch.allclose(value_2, values[1]))
+
+omega_23 = query_2.dot(keys[2])
+
+omega_2 = query_2.matmul(keys.T)
+print(omega_2)
+
+attention_weights_2 = F.softmax(omega_2/ d**0.5, dim=0)
+print(attention_weights_2)
+
+context_vec_2 = attention_weights_2.matmul(values)
+print(context_vec_2)
+
+# Attention is all we need: introducing the orignal transformer
+# architecture
