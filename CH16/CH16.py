@@ -81,3 +81,48 @@ print(context_vec_2)
 
 # Attention is all we need: introducing the orignal transformer
 # architecture
+
+torch.manual_seed(123)
+d = embedded_sentence.shape[1]
+one_U_query = torch.rand(d, d)
+
+# Assuming we have eight attention heads
+h= 8 
+multihead_U_query = torch.rand(h, d, d)
+multihead_U_key = torch.rand(h, d, d)
+multihead_U_value = torch.rand(h, d, d)
+
+# The computation involving the query projection for the ith
+# data point in the jth head can be written as wollos
+# {q^(i)}_j = U_{qj} x^(i)
+
+multihead_U_query_2 = multihead_U_query.matmul(x_2)
+print(multihead_U_query_2.shape)
+
+# calculating key and value for each head
+multihead_U_key_2 = multihead_U_key.matmul(x_2)
+multihead_U_value_2 = multihead_U_value.matmul(x_2)
+
+print(multihead_U_key_2[2])
+print(multihead_U_key.shape)
+print(embedded_sentence.shape)
+multihead_keys = multihead_U_key.matmul(embedded_sentence.T)
+print(multihead_keys.shape)
+multihead_keys = multihead_keys.permute(0,2,1)
+
+# Head 3, datapoint 2
+print(multihead_keys.shape)
+print(multihead_keys[2,1])
+
+# Implementing for values
+
+multihead_values = multihead_U_value.matmul(embedded_sentence.T)
+multihead_values = multihead_values.permute(0 , 2, 1)
+
+multihead_z_2 = torch.rand(8, 16)
+
+# Concatenation and squashing (pag 557)
+linear = torch.nn.Linear(8*16, 16)
+context_vector_2 = linear(multihead_z_2.flatten())
+print(context_vector_2.shape)
+
