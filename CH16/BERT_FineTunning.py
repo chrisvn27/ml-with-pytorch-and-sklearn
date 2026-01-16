@@ -143,4 +143,59 @@ for epoch in range(NUM_EPOCHS):
 print(f"Total Training Time: {(time.time() - start_time)/60:.2f} min")
 print(f"Test accuracy: {compute_accuracy(model, test_loader, DEVICE):.2f}%")
 
-# Stopped at page 582
+# Fine-tunning a transformer more conveniently using the 
+# Trainer API
+model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased')
+model.to(DEVICE)
+model.train();
+
+optim = torch.optim.Adam(model.parameters(), lr=5e-5)
+
+from transformers import Trainer, TrainingArguments
+
+training_args = TrainingArguments(
+    output_dir='./results',
+    num_train_epochs=3,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
+    logging_dir='./logs',
+    logging_steps=10,
+)
+
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_dataset,
+    optimizers=(optim, None) #optim and learning rate scheduler
+)
+
+from datasets import load_metric
+import numpy as np
+
+metric = load_metric("accuracy")
+
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    #note: logits are a numpy array, not a pytorch tensor
+    predictions = np.argmax(logits, axis=-1)
+    return metric.compute(predictions=predictions, references=labels)
+
+
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_dataset,
+    eval_dataset=test_dataset,
+    compute_metrics=compute_metrics,
+    optimizers=(optim, None) #optim and learning rate scheduler
+)
+
+start_time = time.time()
+trainer.train()
+
+print(trainer.evaluate())
+
+model.eval()
+model.to(DEVICE)
+
+print(f"Test accuracy: {compute_accuracy(model, test_loader, DEVICE):.2f}%")
