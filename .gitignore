@@ -13,3 +13,8 @@ aclImdb_v1.tar.gz
 
 #Mysterious Island.txt
 MysteriousIsland.txt
+
+# IMDB dataset (BERT finetunning)
+movie_data.csv
+movie_data.csv.gz
+
