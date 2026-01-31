@@ -16,3 +16,4 @@ from transformers import GPT2Model
 model = GPT2Model.from_pretrained('gpt2')
 output = model(**encoded_input)
 print(output['last_hidden_state'].shape)
+
