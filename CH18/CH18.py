@@ -1,6 +1,10 @@
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
+import torch
+from torch.nn.parameter import Parameter
+import math
+import torch.nn.functional as F
 
 G= nx.Graph()
 # Hex codes for colors if we draw graph
@@ -29,3 +33,65 @@ print(X)
 color_map = nx.get_node_attributes(G, 'color').values()
 nx.draw(G, with_labels=True, node_color=color_map)
 plt.show()
+
+
+class NodeNetwork(torch.nn.Module):
+    def __init__(self, input_features):
+        super().__init__()
+        self.conv1 = BasicGraphConvolutionLayer(input_features,  32)
+        self.conv2 =  BasicGraphConvolutionLayer(32, 32)
+        self.fc_1 = torch.nn.Linear(32,16)
+        self.out_layer  = torch.nn.Linear(16, 2)
+
+    def forward(self, X, A, batch_mat):
+        x = F.relu(self.conv1(X, A))
+        x = F.relu(self.conv2(x, A))
+        output = global_sum_pool(x, batch_mat)
+        output = self.fc_1(output)
+        output = self.out_layer(output)
+        return  F.softmax(output,  dim=1)
+    
+
+class BasicGraphConvolutionLayer(torch.nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.W2 = Parameter(torch.rand((in_channels, out_channels), dtype=torch.float32))
+        self.W1 = Parameter(torch.rand((in_channels, out_channels), dtype=torch.float32))
+        self.bias = Parameter(torch.zeros(out_channels, dtype=torch.float32))
+
+    def forward(self, X, A):
+        potential_msgs = torch.mm(X, self.W2)
+        propagated_msgs = torch.mm(A, potential_msgs)
+        root_update = torch.mm(X, self.W1)
+        output = root_update + propagated_msgs + self.bias
+        return output
+
+
+def global_sum_pool(X, batch_mat):
+    if batch_mat  is None  or batch_mat.dim() == 1:
+        return  torch.sum(X, dim=0).unsqueeze(0)
+    else:
+        return  torch.mm(batch_mat, X)
+
+
+print('X.shape:', X.shape)
+print('A.shape:', A.shape)
+
+basiclayer = BasicGraphConvolutionLayer(3, 8)
+out =  basiclayer(
+    X=torch.tensor(X, dtype=torch.float32),
+    A=torch.tensor(A, dtype=torch.float32)
+)
+
+print('Output shape:', out.shape)
+
+def get_batch_tensor(graph_sizes):
+    starts = [sum(graph_sizes[:idx]) for idx in range(len(graph_sizes))]
+    stops = [starts[idx] + graph_sizes[idx] for idx in range(len(graph_sizes))]
+    tot_len = sum(graph_sizes)
+    batch_size = len(graph_sizes)
+    #TODO stopped at page 654
+    
+
